@@ -2,9 +2,8 @@ import gymnasium as gym
 import panda_gym
 import time
 
-env = gym.make("PandaReach-v3", render_mode = "human")
+env = gym.make("PandaReach-v2", render_mode = "human")
 observation, info = env.reset()
-print(observation)
 
 for _ in range(1000):
   current_position = observation["observation"][0:3]

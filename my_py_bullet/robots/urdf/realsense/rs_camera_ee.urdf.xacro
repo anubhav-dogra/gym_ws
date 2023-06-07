@@ -1,0 +1,11 @@
+<?xml version="1.0" ?>
+<robot name="realsense2_camera" xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <xacro:arg name="use_nominal_extrinsics" default="false" />
+  <xacro:include filename="$(find iiwa_description)/urdf/realsense/_d435.urdf.xacro"/>
+  <!-- <xacro:include filename="$(find iiwa_description)/urdf/_d435i.urdf.xacro"/> -->
+
+  <xacro:sensor_d435 parent="tool_link" use_nominal_extrinsics="$(arg use_nominal_extrinsics)" name="camera">
+    <!-- <origin xyz="0.035 0.026 0.01475" rpy="0 -1.57 1.57"/> -->
+    <origin xyz="-0.0 -0.065 0.01825" rpy="0 -1.57 1.57"/>
+  </xacro:sensor_d435>
+</robot>
