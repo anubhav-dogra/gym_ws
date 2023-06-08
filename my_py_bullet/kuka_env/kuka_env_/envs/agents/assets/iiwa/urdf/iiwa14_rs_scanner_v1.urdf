@@ -67,14 +67,14 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="/home/terabotics/gym_ws/my_py_bullet/robots/meshes/iiwa14/visual/link_0.stl"/>
+        <mesh filename="meshes/iiwa14/visual/link_0.stl"/>
       </geometry>
       <material name="Grey"/>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="/home/terabotics/gym_ws/my_py_bullet/robots/meshes/iiwa14/visual/link_0.stl"/>
+        <mesh filename="meshes/iiwa14/visual/link_0.stl"/>
       </geometry>
       <material name="Grey"/>
     </collision>
@@ -104,14 +104,14 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="/home/terabotics/gym_ws/my_py_bullet/robots/meshes/iiwa14/visual/link_1.stl"/>
+        <mesh filename="meshes/iiwa14/visual/link_1.stl"/>
       </geometry>
       <material name="White"/>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="/home/terabotics/gym_ws/my_py_bullet/robots/meshes/iiwa14/visual/link_1.stl"/>
+        <mesh filename="meshes/iiwa14/visual/link_1.stl"/>
       </geometry>
       <material name="White"/>
     </collision>
@@ -135,14 +135,14 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="/home/terabotics/gym_ws/my_py_bullet/robots/meshes/iiwa14/visual/link_2.stl"/>
+        <mesh filename="meshes/iiwa14/visual/link_2.stl"/>
       </geometry>
       <material name="White"/>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="/home/terabotics/gym_ws/my_py_bullet/robots/meshes/iiwa14/visual/link_2.stl"/>
+        <mesh filename="meshes/iiwa14/visual/link_2.stl"/>
       </geometry>
       <material name="White"/>
     </collision>
@@ -166,14 +166,14 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="/home/terabotics/gym_ws/my_py_bullet/robots/meshes/iiwa14/visual/link_3.stl"/>
+        <mesh filename="meshes/iiwa14/visual/link_3.stl"/>
       </geometry>
       <material name="White"/>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="/home/terabotics/gym_ws/my_py_bullet/robots/meshes/iiwa14/visual/link_3.stl"/>
+        <mesh filename="meshes/iiwa14/visual/link_3.stl"/>
       </geometry>
       <material name="White"/>
     </collision>
@@ -197,14 +197,14 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="/home/terabotics/gym_ws/my_py_bullet/robots/meshes/iiwa14/visual/link_4.stl"/>
+        <mesh filename="meshes/iiwa14/visual/link_4.stl"/>
       </geometry>
       <material name="White"/>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="/home/terabotics/gym_ws/my_py_bullet/robots/meshes/iiwa14/visual/link_4.stl"/>
+        <mesh filename="meshes/iiwa14/visual/link_4.stl"/>
       </geometry>
       <material name="White"/>
     </collision>
@@ -228,14 +228,14 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="/home/terabotics/gym_ws/my_py_bullet/robots/meshes/iiwa14/visual/link_5.stl"/>
+        <mesh filename="meshes/iiwa14/visual/link_5.stl"/>
       </geometry>
       <material name="White"/>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="/home/terabotics/gym_ws/my_py_bullet/robots/meshes/iiwa14/visual/link_5.stl"/>
+        <mesh filename="meshes/iiwa14/visual/link_5.stl"/>
       </geometry>
       <material name="White"/>
     </collision>
@@ -259,14 +259,14 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="/home/terabotics/gym_ws/my_py_bullet/robots/meshes/iiwa14/visual/link_6.stl"/>
+        <mesh filename="meshes/iiwa14/visual/link_6.stl"/>
       </geometry>
       <material name="White"/>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="/home/terabotics/gym_ws/my_py_bullet/robots/meshes/iiwa14/visual/link_6.stl"/>
+        <mesh filename="meshes/iiwa14/visual/link_6.stl"/>
       </geometry>
       <material name="White"/>
     </collision>
@@ -290,14 +290,14 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="/home/terabotics/gym_ws/my_py_bullet/robots/meshes/iiwa14/visual/link_7.stl"/>
+        <mesh filename="meshes/iiwa14/visual/link_7.stl"/>
       </geometry>
       <material name="Grey"/>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="/home/terabotics/gym_ws/my_py_bullet/robots/meshes/iiwa14/visual/link_7.stl"/>
+        <mesh filename="meshes/iiwa14/visual/link_7.stl"/>
       </geometry>
       <material name="Grey"/>
     </collision>
@@ -332,7 +332,7 @@
       <origin rpy="0 0 -1.57" xyz="-0.12 0.04 0"/>
       <geometry>
         <!-- <mesh filename="package://iiwa_description/meshes/tools/visual/rscamera_tool.STL"/> -->
-        <mesh filename="/home/terabotics/gym_ws/my_py_bullet/robots/meshes/tools/visual/Scanner_mount_assem_prt.STL"/>
+        <mesh filename="meshes/tools/visual/Scanner_mount_assem_prt.STL"/>
         <!-- <cylinder length="0.1275" radius="0.020"/> -->
       </geometry>
       <material name="Grey"/>
@@ -342,7 +342,7 @@
       <origin rpy="0 0 -1.57" xyz="-0.12 0.04 0"/>
       <geometry>
         <!-- <mesh filename="package://iiwa_description/meshes/tools/collision/rscamera_tool.STL"/> -->
-        <mesh filename="/home/terabotics/gym_ws/my_py_bullet/robots/meshes/tools/visual/Scanner_mount_assem_prt.STL"/>
+        <mesh filename="meshes/tools/visual/Scanner_mount_assem_prt.STL"/>
         <!-- <cylinder length="0.1275" radius="0.020"/> -->
       </geometry>
       <material name="Grey"/>

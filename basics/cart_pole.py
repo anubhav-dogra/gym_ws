@@ -4,6 +4,7 @@ import gymnasium as gym
 
 #mujoco environment.
 env = gym.make("InvertedPendulum-v4",render_mode="human")
+# env = gym.make("KukaEnv-v0", render_mode = "human")
 
 observation, info = env.reset(seed=42)
 print ("observation", observation, "info", info)
