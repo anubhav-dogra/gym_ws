@@ -1,6 +1,7 @@
 import gymnasium
 import numpy as np
 import pybullet as p
+from .agents.iiwa import iiwa
 
 class KukaEnv(gymnasium.Env):
     metadata = {'render.modes':['human']}
@@ -9,7 +10,7 @@ class KukaEnv(gymnasium.Env):
         pass
 
     def step(self, action):
-        pass
+        eef_pose = self.body.id
 
     def reset(self):
         p.resetSimulation(physicsClientId=self.id)
