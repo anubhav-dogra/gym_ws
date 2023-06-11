@@ -31,12 +31,13 @@ class iiwaEnv(gym.Env):
         self.maxVelocity=0.35
         actionRepeat=1
         renders=True
-        maxSteps=1000
+        maxSteps=100000
         self._maxSteps = maxSteps
         self._actionRepeat = actionRepeat
         self._renders = renders
         self.terminated = 0
         self._timestep = 1. / 240.
+        self.target_pos = np.array([-0.75, 0.01, 0.04])
         #lower limits for null space
         self.lowerlimits = [-.967, -2, -2.96, 0.19, -2.96, -2.09, -3.05]
         #upper limits for null space
@@ -49,31 +50,34 @@ class iiwaEnv(gym.Env):
         self.jointdampings = [
             0.00001, 0.00001, 0.00001, 0.00001, 0.00001, 0.00001, 0.00001, 0.00001, 0.00001, 0.00001,
             0.00001]
-        self.state = self.init_state()
-
         self.step_count = 0
-
-    def init_state(self):
         if self._renders:
             cid = p.connect(p.SHARED_MEMORY)
         if (cid < 0):
             cid = p.connect(p.GUI)
-            p.resetDebugVisualizerCamera(1.3, 180, -41, [0.52, -0.2, -0.33])
+            p.resetDebugVisualizerCamera(1.5, 180, -40, [-1, -0.0, 0.33])
         else:
             p.connect(p.DIRECT)
+        self.state = self.init_state()
+
+
+
+    def init_state(self):
+
         p.resetSimulation()
         p.setAdditionalSearchPath(pybullet_data.getDataPath())
         p.setTimeStep(self._timestep)
         p.setGravity(0,0,-9.81)
-        self.iiwaId = p.loadURDF(os.path.join('agents','assets', 'iiwa','urdf', 'iiwa14_rs_scanner_v1.urdf'),
+        path = "/home/anubhav/gym_ws/my_py_bullet/kuka_env/kuka_env_example/envs"
+        self.iiwaId = p.loadURDF(os.path.join(path,'agents','assets','iiwa','urdf','iiwa14_rs_scanner_v1.urdf'),
                                 basePosition=[0,0,0],
                                 baseOrientation=[0,0,0,1],
                                 useFixedBase=True,
                                 flags=p.URDF_USE_SELF_COLLISION)
-        p.resetBasePositionAndOrientation(self.iiwaId, [-0.6200000, 0.000000, 0.00000],
+        p.resetBasePositionAndOrientation(self.iiwaId, [0.00000, 0.000000, 0.00000],
                                       [0.000000, 0.000000, 0.000000, 1.000000])
         p.loadURDF("plane.urdf",[0,0,0],[0,0,0,1])
-        p.setTimeStep(1. /240.)
+        # p.setTimeStep(1. /240.)
        
         self.jointPositions = [
         0.00, -2.464, 1.486, 1.405, 1.393, 1.515, -1.747, 0.842, 0.0, 0.000000, -0.00000 ]
@@ -116,23 +120,25 @@ class iiwaEnv(gym.Env):
     
     def reset(self):
         self.terminated = 0
-        p.disconnect()
+        # p.disconnect()
         self.state=self.init_state()
         self.step_count=0
+        obs = self.getObservation()
+        return obs
     
-    def seed(self, seed =None):
+    def seed(self, seed = None):
         self.np_random, seed  = seeding.np_random(seed)
         return [seed]
-        
+    
     def step(self,action):
         
         dv = 0.005
         dx = action[0]*dv
         dy = action[1]*dv
-        da = action[2]*0.05
+        dz = action[2]*dv
         # f = 0.3
         # realAction = [dx, dy, -0.002, da, f] #according to the target most probably
-        realAction = [dx, dy, 0.15, da]
+        realAction = [dx, dy, dz, 0]
         return self.step2(realAction)
     
     def step2(self,action):
@@ -142,21 +148,26 @@ class iiwaEnv(gym.Env):
             if self._termination():  #defined function
                 break
             self.step_count+=1
-        if self._render: #defined function
+        if self._renders: #defined function
             time.sleep(self._timestep)
         self.observation = self.getObservation()
         print("self.step_count")
         print(self.step_count)
 
-        done  = self._termination()
-        npaction = np.array([action[3]])  #only penalize rotation until learning works well [action[0],action[1],action[3]])
-        actioncost = np.linalg.norm(npaction)*10
-        print("action_cost")
-        print(actioncost)
+        terminated  = self._termination()
+        print(terminated)
+        # npaction = np.array([action[3]])  #only penalize rotation until learning works well [action[0],action[1],action[3]])
+        actioncost = np.linalg.norm(action)
+        # print("action_cost")
+        # print(actioncost)
+    
         reward = self._reward() - actioncost
-        print("reward")
-        print(reward)
-        return np.array(self.observation), reward, done, {}
+        # print("reward")
+        # print(reward)
+        
+        truncated = False
+        info = {"is_success": terminated}
+        return np.array(self.observation), reward, terminated, truncated, info
     
         ## simple example of action (random)
         # self.step_count +=1
@@ -243,17 +254,21 @@ class iiwaEnv(gym.Env):
 
             ## target positions I guess
             self.endEffectorPos[0]=self.endEffectorPos[0] + dx
-            if (self.endEffectorPos[0] > 0.65):
-                self.endEffectorPos[0] = 0.65
-            if (self.endEffectorPos[0] < 0.50):
-                self.endEffectorPos[0] = 0.50
+            if (self.endEffectorPos[0] > -0.75):
+                self.endEffectorPos[0] = -0.75
+            if (self.endEffectorPos[0] < -0.75):
+                self.endEffectorPos[0] = -0.75
             self.endEffectorPos[1] = self.endEffectorPos[1] + dy
 
-            if (self.endEffectorPos[1] < -0.17):
-                self.endEffectorPos[1] = -0.17
-            if (self.endEffectorPos[1] > 0.22):
-                self.endEffectorPos[1] = 0.22
+            if (self.endEffectorPos[1] < -0.01):
+                self.endEffectorPos[1] = -0.01
+            if (self.endEffectorPos[1] > -0.01):
+                self.endEffectorPos[1] = -0.01
             self.endEffectorPos[2] = self.endEffectorPos[2] + dz
+            if (self.endEffectorPos[2] < 0.04):
+                self.endEffectorPos[2] = 0.04
+            if (self.endEffectorPos[2] > 0.04):
+                self.endEffectorPos[2] = 0.04
             self.endEffectorAngle = self.endEffectorAngle + da
             pos = self.endEffectorPos
             orn = p.getQuaternionFromEuler([math.pi, 0, -math.pi/2])  # -math.pi,yaw])
@@ -287,12 +302,13 @@ class iiwaEnv(gym.Env):
                     jointPoses = p.calculateInverseKinematics(self.iiwaId,
                                                               self.eef_index,
                                                               pos)
-            #print("jointPoses")
-            #print(jointPoses)
-            #print("self.kukaEndEffectorIndex")
-            #print(self.kukaEndEffectorIndex)
+            # print("jointPoses")
+            # print(jointPoses)
+            # print("self.eef_index")
+            # print(self.eef_index)
+            # print(self.numJoints)
             if (self.useSimulation):
-                for i in range(self.eef_index + 1):
+                for i in range(7):
                 #print(i)
                     p.setJointMotorControl2(bodyUniqueId=self.iiwaId,
                                             jointIndex=i,
@@ -332,15 +348,20 @@ class iiwaEnv(gym.Env):
 
         #print("self._envStepCounter")
         #print(self._envStepCounter)
-        if (self.terminated or self.step_count > self._maxSteps):
+        if (self.step_count > self._maxSteps):
             self.observation = self.getObservation()
+            print("*********************terminated observation*********************")
             return True
-        maxDist = 0.005
+        # maxDist = 0.005
         # closestPoints = p.getClosestPoints(self.trayUid, self.iiwaId, maxDist)
 
         # if (len(closestPoints)):  #(actualEndEffectorPos[2] <= -0.43):
-        if (actualEndEffectorPos[2] <=-0.62):
-            self.terminated = 1
+        # if (actualEndEffectorPos[2] >=0.35):
+        #     self.terminated = 1
+        if np.linalg.norm(actualEndEffectorPos - self.target_pos) < 0.01:
+            self.terminated=1
+            print("pos error")
+            print(np.linalg.norm(actualEndEffectorPos - self.target_pos))
 
             #print("terminating, closing gripper, attempting grasp")
             #start grasp and terminate
@@ -376,8 +397,7 @@ class iiwaEnv(gym.Env):
         # blockPos, blockOrn = p.getBasePositionAndOrientation(self.blockUid)
         # closestPoints = p.getClosestPoints(self.blockUid, self.iiwaId, 1000, -1,
         #                                 self.eef_index)
-
-        reward = -1000
+        # reward = -1000
 
         # numPt = len(closestPoints)
         # #print(numPt)
@@ -396,14 +416,11 @@ class iiwaEnv(gym.Env):
         #     #print("reward")
         #     #print(reward)
         state = p.getLinkState(self.iiwaId, self.eef_index)
-        pos = state[0]
-        orn = state[1]
-        if pos[0] >= 0.65 & pos[1] <=0.7:
-            reward = reward +10000
-        else:
-            reward = -pos*10
-            
-        return reward
+        tool_pos = state[0]
+        reward_distance = -np.linalg.norm(self.target_pos - tool_pos) # Penalize distances away from target
+        print("reward_distance")
+        print(reward_distance)
+        return reward_distance
 
 # env = iiwaEnv()
 # for step in range(500):
