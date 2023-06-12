@@ -51,13 +51,14 @@ class iiwaEnv(gym.Env):
             0.00001, 0.00001, 0.00001, 0.00001, 0.00001, 0.00001, 0.00001, 0.00001, 0.00001, 0.00001,
             0.00001]
         self.step_count = 0
-        if self._renders:
-            cid = p.connect(p.SHARED_MEMORY)
-        if (cid < 0):
-            cid = p.connect(p.GUI)
-            p.resetDebugVisualizerCamera(1.5, 180, -40, [-1, -0.0, 0.33])
-        else:
-            p.connect(p.DIRECT)
+        # if self._renders:
+        #     cid = p.connect(p.SHARED_MEMORY)
+        # if (cid < 0):
+        #     cid = p.connect(p.GUI)
+        #     p.resetDebugVisualizerCamera(1.5, 180, -40, [-1, -0.0, 0.33])
+        # else:
+        p.connect(p.DIRECT)
+        # p.connect(p.DIRECT)
         self.state = self.init_state()
 
 
@@ -65,7 +66,7 @@ class iiwaEnv(gym.Env):
     def init_state(self):
 
         p.resetSimulation()
-        path = "/home/terabotics/gym_ws/my_py_bullet/kuka_env/kuka_env_example/envs"
+        path = "/home/anubhav/gym_ws/my_py_bullet/kuka_env/kuka_env_example/envs"
         self.iiwaId = p.loadURDF(os.path.join(path,'agents','assets','iiwa','urdf','iiwa14_rs_scanner_v1.urdf'),
                                 basePosition=[0,0,0],
                                 baseOrientation=[0,0,0,1],
@@ -135,7 +136,8 @@ class iiwaEnv(gym.Env):
         return [seed]
     
     def step(self,action):
-        action_ = -0.001*(self.target_pos - self.getObservation()[0])
+        action_ = (self.target_pos - self.getObservation()[0])
+        action_ = action_/np.linalg.norm(action_) #normalizing 
         # print(action_)
         # dv = 0.005
         # dx = action[0]*dv
@@ -364,22 +366,25 @@ class iiwaEnv(gym.Env):
             self._observation = self.getObservation()
             return True
         
-        if (actualEndEffectorPos[2] < 0.1):
+        if (actualEndEffectorPos[2] < 0.05):
             return True
         
-        if (actualEndEffectorPos[2] > 0.25 or actualEndEffectorPos[1] < -0.1):
+        if (actualEndEffectorPos[2] > 0.3 or actualEndEffectorPos[1] < -0.1):
             return True
         return False
 
     def _reward(self):
         state = p.getLinkState(self.iiwaId, self.eef_index)
         tool_pos = state[0]
+        reward1=0
         reward_distance = -np.linalg.norm(self.target_pos - tool_pos) # Penalize distances away from target
+        if (np.linalg.norm(self.target_pos - tool_pos)) < 0.1:
+            reward1 = 100
         if (np.linalg.norm(self.target_pos - tool_pos)) < 0.01:
             reward_distance = 1000 + reward_distance
         # print("reward_distance")
         # print(reward_distance)
-        return reward_distance
+        return reward_distance+reward1
 
 # env = iiwaEnv()
 # for step in range(500):
