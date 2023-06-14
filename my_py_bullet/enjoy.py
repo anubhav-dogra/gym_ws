@@ -12,15 +12,17 @@ env = gym.make('iiwaEnvPos-v0')
 observation, info = env.reset()
 env.render()
 model_dir = "models/PPO"
-model_path = f"{model_dir}/90000"
+model_path = f"{model_dir}/490000"
 
 model = PPO.load(model_path, env=env)
 episode = 10000
+terminated=1
 
-for ep in range(episode):
+# some for loop idk
+action, _ = model.predict(obs)
+obs, reward, terminated, truncated, info = env.step(action)
+if terminated:
     obs, _ = env.reset()
-    action, _ = model.predict(obs)
-    obs, reward, terminated, truncated, info = env.step(action)
     # time.sleep(0.1)
 
 env.close()
