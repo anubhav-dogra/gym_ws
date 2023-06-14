@@ -8,5 +8,5 @@ register(
 register(
     id='iiwaEnvPos-v0',
     entry_point='kuka_env_example.envs:iiwaEnvPos',
-    max_episode_steps=1000,
+    max_episode_steps=300,
 )

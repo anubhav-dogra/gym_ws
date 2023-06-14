@@ -13,11 +13,11 @@ from gymnasium import spaces
 from gymnasium.utils import seeding
 
 
-MIN_GOAL_COORDS = np.array([-0.8, -.13, 0.05])
-MAX_GOAL_COORDS = np.array([-0.6, .13, .4])
-MIN_END_EFF_COORDS = np.array([-.8, -.15, 0.04])
-MAX_END_EFF_COORDS = np.array([-.6, .15, .45])
-FIXED_GOAL_COORDS_SPHERE = np.array([-.75, .1, 0.26])
+MIN_GOAL_COORDS = np.array([-0.8, -.2, 0.05])
+MAX_GOAL_COORDS = np.array([-0.6, .2, .5])
+MIN_END_EFF_COORDS = np.array([-.8, -.2, 0.05])
+MAX_END_EFF_COORDS = np.array([-.6, .2, .5])
+FIXED_GOAL_COORDS_SPHERE = np.array([-.7, -0.1, 0.35])
 RESET_VALUES=[0.00, -2.464, 1.486, 1.405, 1.393, 1.515, -1.747, 0.842, 0.0, 0.000000, -0.00000]
 
 RENDER_HEIGHT = 720
@@ -75,8 +75,8 @@ class iiwaEnvPos(gym.Env):
         self.action = np.zeros(7)
         self.pybullet_action = np.zeros(7)
         self.pybullet_action_coeff = 1
-        self.pybullet_action_min = np.array([-0.05, -0.025, -0.05, -0.05, -0.05, -0.05 -0.05]) * self.pybullet_action_coeff
-        self.pybullet_action_max = np.array([0.05, 0.025, 0.05, 0.05, 0.05, 0.05, 0.05]) * self.pybullet_action_coeff
+        self.pybullet_action_min = np.array([-0.05, -0.05, -0.05, -0.05, -0.05, -0.05 -0.05]) * self.pybullet_action_coeff
+        self.pybullet_action_max = np.array([0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05]) * self.pybullet_action_coeff
         self.action_min = [-1, -1, -1, -1, -1, -1, -1]
         self.action_max = [1, 1, 1, 1, 1, 1, 1]
         self.dist = 0
@@ -121,8 +121,7 @@ class iiwaEnvPos(gym.Env):
 
     def init_state(self):
         # p.resetSimulation()
-        p.setTimeStep(self._timestep)
-        p.stepSimulation()
+        # p.stepSimulation()
         self.observation = self.getObservation()
         return np.array(self.observation)
 
@@ -132,7 +131,9 @@ class iiwaEnvPos(gym.Env):
     
     def reset(self, seed=None, options=None):
         super().reset(seed=seed)
+        # self.reward=0
         self.terminated = 0
+        self.step_count=0
         self.goal_pos = FIXED_GOAL_COORDS_SPHERE
         self.numJoints = p.getNumJoints(self.iiwaId)
         maxForce = 200
@@ -143,7 +144,7 @@ class iiwaEnvPos(gym.Env):
                                     p.POSITION_CONTROL,
                                     targetPosition=RESET_VALUES[jointIndex],
                                     force=maxForce)
-        self.step_count=0
+        # self.step_count=0
         p.stepSimulation()
         self.observation = self.getObservation()
         info = self._get_info()
@@ -170,24 +171,24 @@ class iiwaEnvPos(gym.Env):
         for joint_number in range(1,self.numJoints-3):
             j_pos[count] = p.getJointState(self.iiwaId,joint_number)[0]
             count+=1
-        p.stepSimulation()
-        self.step_count+=1
         self.new_joint_positions = j_pos + self.pybullet_action
         """ Instantaneous reset of the joint angles (not position control) """
         j_1 = np.array([0.0])
         j_last = np.array([0.0,0.0,0.0])
         j_state_ = np.concatenate((j_1, self.new_joint_positions, j_last),axis=0)
-        for i in range(self.numJoints):
-            p.resetJointState(
-                self.iiwaId,
-                i,
-                j_state_[i]
-            )
-        
-        # terminated  = self._termination()
+        for jointIndex in range(self.numJoints):
+            # p.resetJointState(self.iiwaId, jointIndex, RESET_VALUES[jointIndex])
+            p.setJointMotorControl2(self.iiwaId,
+                                jointIndex,
+                                p.POSITION_CONTROL,
+                                targetPosition=j_state_[jointIndex],
+                                force=200)
+        p.stepSimulation()
+        self.step_count+=1
+        terminated  = self._termination()
     
         reward = self._reward()
-        terminated = False
+        
         # if self.new_distance < 0.0005:
         #      terminated = True
         # print("reward")
@@ -217,7 +218,7 @@ class iiwaEnvPos(gym.Env):
         self.goal_pos = FIXED_GOAL_COORDS_SPHERE
         p.setGravity(0,0,-9.81)
         p.setAdditionalSearchPath(pybullet_data.getDataPath())
-        path = "/home/terabotics/gym_ws/my_py_bullet/kuka_env/kuka_env_example/envs"
+        path = "/home/anubhav/gym_ws/my_py_bullet/kuka_env/kuka_env_example/envs"
         self.iiwaId = p.loadURDF(os.path.join(path,'agents','assets','iiwa','urdf','iiwa14_rs_scanner_v1.urdf'),
                                 basePosition=[0,0,0],
                                 baseOrientation=[0,0,0,1],
@@ -238,6 +239,7 @@ class iiwaEnvPos(gym.Env):
                                 p.POSITION_CONTROL,
                                 targetPosition=RESET_VALUES[jointIndex],
                                 force=200)
+        p.stepSimulation()
 
     ####################################################################################
     ######################## user Defined functions ####################################
@@ -275,38 +277,38 @@ class iiwaEnvPos(gym.Env):
 
         return self.observation
     
-    # def _termination(self):
-    #     #print (self._kuka.endEffectorPos[2])
-    #     state = p.getLinkState(self.iiwaId, self.eef_index)
-    #     actualEndEffectorPos = state[0]
+    def _termination(self):
+        #print (self._kuka.endEffectorPos[2])
+        state = p.getLinkState(self.iiwaId, self.eef_index)
+        actualEndEffectorPos = state[0]
 
-    #     #print("self._envStepCounter")
-    #     #print(self._envStepCounter)
-    #     if (self.step_count > self._maxSteps):
-    #         self.observation = self.getObservation()
-    #         print("*********************terminated observation*********************")
-    #         return True
+        #print("self._envStepCounter")
+        #print(self._envStepCounter)
+        if (self.step_count > self._maxSteps):
+            self.observation = self.getObservation()
+            print("*********************terminated observation*********************")
+            return True
         
-    #     if np.linalg.norm(actualEndEffectorPos - self.target_pos) < 0.01:
-    #         self.terminated=1
-    #         print("pos error")
-    #         print(np.linalg.norm(actualEndEffectorPos - self.target_pos))
-    #         self._observation = self.getObservation()
-    #         return True
+        if (np.linalg.norm(actualEndEffectorPos-self.goal_pos) > 0.5):
+            self._observation = self.getObservation()
+            return True
         
-    #     if (actualEndEffectorPos[2] < 0.05):
-    #         return True
+        if (actualEndEffectorPos[2] < 0.025):
+            return True
         
-    #     if (actualEndEffectorPos[2] > 0.3 or actualEndEffectorPos[1] < -0.1):
-    #         return True
-    #     return False
+        return False
 
     def _reward(self):
         state = p.getLinkState(self.iiwaId, self.eef_index)
         tool_pos = state[0]
         self.dist = np.linalg.norm(tool_pos-self.goal_pos)
-        reward = - self.dist ** 2
+        reward = - self.dist ** 2 
         reward *= self.reward_coeff
+        # if (np.linalg.norm(tool_pos-self.goal_pos) > 0.1):
+        #     reward += -10
+        if (np.linalg.norm(tool_pos-self.goal_pos) < 0.1):
+            reward = reward+10
+        # print(reward)
         return reward
         
 
