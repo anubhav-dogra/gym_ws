@@ -1,7 +1,6 @@
 import gymnasium
 import numpy as np
 import pybullet as p
-from .agents.iiwa import iiwa
 
 class KukaEnv(gymnasium.Env):
     metadata = {'render.modes':['human']}

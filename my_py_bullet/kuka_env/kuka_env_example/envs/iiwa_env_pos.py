@@ -16,10 +16,10 @@ from gymnasium.utils import seeding
 # from gym.utils import seeding
 
 MIN_GOAL_COORDS = np.array([-0.8, -.2, 0.05])
-MAX_GOAL_COORDS = np.array([-0.2, .2, .5])
+MAX_GOAL_COORDS = np.array([-0.2, .2, .7])
 MIN_END_EFF_COORDS = np.array([-.8, -.2, 0.05])
 MAX_END_EFF_COORDS = np.array([-.2, .2, .5])
-FIXED_GOAL_COORDS_SPHERE = np.array([-.7, -0.1, 0.35])
+FIXED_GOAL_COORDS_SPHERE = np.array([-.6, -0.0, 0.15])
 # RESET_VALUES=[0.00, -2.464, 1.486, 1.405, 1.393, 1.515, -1.747, 0.842, 0.0, 0.000000, -0.00000]
 RESET_VALUES=[-2.464, 1.486, 1.405, 1.393, 1.515, -1.747, 0.842]
 RENDER_HEIGHT = 720
@@ -32,7 +32,7 @@ class iiwaEnvPos(gym.Env):
         self.useSimulation = 1
         self.useInverseKinematics = 1
         self.useNullSpace = 1
-        self.useOrientation = 1
+        self.useOrientation = 0
         self.eef_index = 6
         self.observations = []
         self.cam_dist = 1.3
@@ -155,7 +155,7 @@ class iiwaEnvPos(gym.Env):
         return [seed]
     
     def step(self,action):
-        p.configureDebugVisualizer(p.COV_ENABLE_SINGLE_STEP_RENDERING)
+        # p.configureDebugVisualizer(p.COV_ENABLE_SINGLE_STEP_RENDERING)
         orn = p.getQuaternionFromEuler([0, -math.pi, 0])  # -math.pi,yaw]).
         dv = 0.005
         dx = action[0] * dv
@@ -175,11 +175,11 @@ class iiwaEnvPos(gym.Env):
         # print(new_pose)
         jointPoses = p.calculateInverseKinematics(self.iiwaId,
                                                 self.eef_index,
-                                                new_pose,
-                                                lowerLimits=self.lowerlimits,
-                                                upperLimits=self.upperlimits,
-                                                jointRanges=self.jointranges,
-                                                restPoses=self.resetposes)
+                                                new_pose)
+                                                # lowerLimits=self.lowerlimits,
+                                                # upperLimits=self.upperlimits,
+                                                # jointRanges=self.jointranges,
+                                                # restPoses=self.resetposes)
         
         for joinitIndex in range(6):
             # p.resetJointState(self.iiwaId, jointIndex, RESET_VALUES[jointIndex])
@@ -193,8 +193,8 @@ class iiwaEnvPos(gym.Env):
                                 velocityGain=1)
         p.stepSimulation()
         # self.step_count+=1
-        actionCost = np.linalg.norm(action) * 10
-        reward = self._reward() - actionCost
+        actionCost = np.linalg.norm(action)
+        reward = self._reward()
         terminated  = self._termination()
         
         # if self.new_distance < 0.0005:
@@ -203,6 +203,7 @@ class iiwaEnvPos(gym.Env):
         # print(reward)
         
         truncated = False
+        self.observation = self.getObservation()
         info = {"is_success": terminated}
         return np.array(self.observation), reward, terminated, truncated, info
    
@@ -286,7 +287,6 @@ class iiwaEnvPos(gym.Env):
         self.observation = np.concatenate((pos, j_pos),axis=0)
         # self.observation.extend(list(pos))
         # self.observation.extend(list(euler))
-
         return self.observation
     
     def _termination(self):
@@ -305,7 +305,7 @@ class iiwaEnvPos(gym.Env):
             self._observation = self.getObservation()
             return True
         # print(actualEndEffectorPos)
-        if (actualEndEffectorPos[2] < 0.25):
+        if (actualEndEffectorPos[2] < 0.1):
             return True
         
         return False
@@ -320,13 +320,18 @@ class iiwaEnvPos(gym.Env):
         
         # if (np.linalg.norm(tool_pos-self.goal_pos) > 0.1):
         #     reward += -10
-        if (tool_pos[2]<0.25):
-            reward += -10
+        if (tool_pos[2]<0.1):
+            reward += -1
+        if (np.linalg.norm(tool_pos-self.goal_pos) < 0.1):
+            reward = reward+1
         if (np.linalg.norm(tool_pos-self.goal_pos) < 0.05):
             reward = reward+10
+        if (np.linalg.norm(tool_pos-self.goal_pos) < 0.01):
+            reward = reward+10
+        if (np.linalg.norm(tool_pos-self.goal_pos) < 0.001):
+            reward = reward+100
         # print(reward)
-        return reward
-        
+        return reward 
 # def step(self,action):
     #     # get distance and end effector position before taking the action
     #     self.endeffector_pos = p.getLinkState(self.iiwaId,self.eef_index)[0]
