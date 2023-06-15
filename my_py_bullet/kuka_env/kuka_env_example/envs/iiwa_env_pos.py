@@ -18,8 +18,8 @@ from gymnasium.utils import seeding
 MIN_GOAL_COORDS = np.array([-0.8, -.2, 0.05])
 MAX_GOAL_COORDS = np.array([-0.2, .2, .7])
 MIN_END_EFF_COORDS = np.array([-.8, -.2, 0.05])
-MAX_END_EFF_COORDS = np.array([-.2, .2, .5])
-FIXED_GOAL_COORDS_SPHERE = np.array([-.6, -0.0, 0.15])
+MAX_END_EFF_COORDS = np.array([-.2, .2, .7])
+FIXED_GOAL_COORDS_SPHERE = np.array([-.52, -0.0, 0.25])
 # RESET_VALUES=[0.00, -2.464, 1.486, 1.405, 1.393, 1.515, -1.747, 0.842, 0.0, 0.000000, -0.00000]
 RESET_VALUES=[-2.464, 1.486, 1.405, 1.393, 1.515, -1.747, 0.842]
 RENDER_HEIGHT = 720
@@ -29,6 +29,7 @@ class iiwaEnvPos(gym.Env):
     metadata = {"render_modes": ["human", "rgb_array"], "render_fps": 50}
 
     def __init__(self, render_mode=None):
+        super().__init__()
         self.useSimulation = 1
         self.useInverseKinematics = 1
         self.useNullSpace = 1
@@ -140,7 +141,7 @@ class iiwaEnvPos(gym.Env):
         self.step_count=0
         self.goal_pos = FIXED_GOAL_COORDS_SPHERE
         for jointIndex in range(6):
-            p.resetJointState(self.iiwaId, jointIndex, RESET_VALUES[jointIndex])
+            p.resetJointState(self.iiwaId, jointIndex, self.resetposes[jointIndex])
 
         # p.stepSimulation()
         self.observation = self.getObservation()
@@ -182,7 +183,7 @@ class iiwaEnvPos(gym.Env):
                                                 # restPoses=self.resetposes)
         
         for joinitIndex in range(6):
-            # p.resetJointState(self.iiwaId, jointIndex, RESET_VALUES[jointIndex])
+            # p.resetJointState(self.iiwaId, joinitIndex, jointPoses[joinitIndex])
             p.setJointMotorControl2(bodyIndex=self.iiwaId,
                                 jointIndex=joinitIndex,
                                 controlMode=p.POSITION_CONTROL,
@@ -236,7 +237,7 @@ class iiwaEnvPos(gym.Env):
             self.iiwaId = p.loadURDF("kuka_iiwa/model.urdf",[0,0,0])
             p.resetBasePositionAndOrientation(self.iiwaId, [0.00000, 0.000000, 0.00000],
                                         [0.000000, 0.000000, 0.000000, 1.000000])
-            path = "/home/anubhav/gym_ws/my_py_bullet/kuka_env/kuka_env_example/envs"
+            path = "/home/terabotics/gym_ws/my_py_bullet/kuka_env/kuka_env_example/envs"
             # self.iiwaId = p.loadURDF(os.path.join(path,'agents','assets','iiwa','urdf','iiwa14_rs_scanner_v1.urdf'),
             #                         basePosition=[0,0,0],
             #                         baseOrientation=[0,0,0,1],
@@ -246,10 +247,10 @@ class iiwaEnvPos(gym.Env):
                                         useFixedBase=True)
             p.resetBasePositionAndOrientation(
                 self.target_object, self.goal_pos, p.getQuaternionFromEuler(self.target_object_orient))
-            p.loadURDF("plane.urdf",[0,0,0],[0,0,0,1])
+            p.loadURDF("plane.urdf",[0,0,-0.1],[0,0,0,1])
             self.numJoints = p.getNumJoints(self.iiwaId)
             for jointIndex in range(self.numJoints):
-                p.resetJointState(self.iiwaId, jointIndex, RESET_VALUES[jointIndex])
+                p.resetJointState(self.iiwaId, jointIndex, self.resetposes[jointIndex])
                 # p.setJointMotorControl2(self.iiwaId,
                 #                     jointIndex,
                 #                     p.POSITION_CONTROL,
@@ -305,8 +306,8 @@ class iiwaEnvPos(gym.Env):
             self._observation = self.getObservation()
             return True
         # print(actualEndEffectorPos)
-        if (actualEndEffectorPos[2] < 0.1):
-            return True
+        # if (actualEndEffectorPos[2] < 0.01):
+        #     return True
         
         return False
 
@@ -320,14 +321,14 @@ class iiwaEnvPos(gym.Env):
         
         # if (np.linalg.norm(tool_pos-self.goal_pos) > 0.1):
         #     reward += -10
-        if (tool_pos[2]<0.1):
-            reward += -1
-        if (np.linalg.norm(tool_pos-self.goal_pos) < 0.1):
-            reward = reward+1
-        if (np.linalg.norm(tool_pos-self.goal_pos) < 0.05):
-            reward = reward+10
-        if (np.linalg.norm(tool_pos-self.goal_pos) < 0.01):
-            reward = reward+10
+        # if (tool_pos[2]<0.01):
+        #     reward += -1
+        # if (np.linalg.norm(tool_pos-self.goal_pos) < 0.1):
+        #     reward = reward+1
+        # if (np.linalg.norm(tool_pos-self.goal_pos) < 0.05):
+        #     reward = reward+1
+        # if (np.linalg.norm(tool_pos-self.goal_pos) < 0.01):
+        #     reward = reward+10
         if (np.linalg.norm(tool_pos-self.goal_pos) < 0.001):
             reward = reward+100
         # print(reward)
