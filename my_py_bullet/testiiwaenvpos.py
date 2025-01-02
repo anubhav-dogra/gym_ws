@@ -13,7 +13,7 @@ env = gym.make('iiwaEnvPos-v0')
 # vec_env = make_vec_env('iiwaEnvPos-v0', n_envs=1)
 observation = env.reset()
 # print(observation)
-env.render()
+# env.render()
 
 model_dir = "models/A2C"
 logdir = "logs"
@@ -24,7 +24,7 @@ if not os.path.exists(logdir):
 
 model = A2C("MlpPolicy", env, verbose=1, tensorboard_log="logs/A2C")
 TIMESTEPS=100000
-for i in range(1,10):
+for i in range(1,100):
     model.learn(total_timesteps=TIMESTEPS, reset_num_timesteps=False, progress_bar=True)
     model.save(f"{model_dir}/{TIMESTEPS*i}")
 
